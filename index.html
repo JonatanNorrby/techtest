@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#20150f">
   <meta name="description" content="A walkable Babylon.js low-poly fantasy style study.">
   <title>Techtest — Ashen Warden's Lair</title>
-  <link rel="stylesheet" href="./styles.css?v=5">
+  <link rel="stylesheet" href="./styles.css?v=7">
   <script>
     window.techtestReady = false;
     window.techtestError = function (detail) {
@@ -38,7 +38,7 @@
     });
   </script>
   <script defer src="https://cdn.babylonjs.com/babylon.js"></script>
-  <script defer type="module" src="./src/main.js?v=6"></script>
+  <script defer type="module" src="./src/main.js?v=7"></script>
 </head>
 <body>
   <canvas id="renderCanvas" aria-label="Walkable 3D fantasy arena"></canvas>
@@ -68,7 +68,7 @@
       <div class="member-body">
         <div class="member-name">Mage <small id="mage-hp">100 / 100 HP</small></div>
         <div class="vitals"><span id="mage-health-fill" class="fill red" style="width:100%"></span></div>
-        <div class="vitals mini"><span class="fill mana" style="width:100%"></span></div><div class="buffs"><i>✧</i><i>◈</i><i>✺</i></div>
+        <div class="vitals mini"><span id="mage-shield-fill" class="fill shield" style="width:0%"></span></div><div class="buffs"><i>✧</i><i>◈</i><i>✺</i><span id="mage-shield-value">SHIELD 0</span></div>
       </div>
     </div>
     <div class="party-member shaman">
@@ -85,6 +85,7 @@
     <div class="boss-emblem">♜</div>
     <div class="boss-main">
       <div class="boss-top"><span>RAVENGAR, THE ASHEN</span><small id="boss-phase">PREPARING</small></div>
+      <div class="boss-health-track"><span id="boss-health-fill" style="width:100%"></span><strong id="boss-health-value">260 / 260 HP</strong></div>
       <div class="boss-track"><span id="boss-cast-fill" class="boss-fill" style="width:0%"></span><span id="boss-value" class="boss-value">WAIT</span></div>
       <div class="boss-effects"><i>♨</i><i>✦</i><i>⬡</i><span id="boss-mechanic" aria-live="polite">WATCH FOR DANGER ZONES</span></div>
     </div>
@@ -96,6 +97,7 @@
   </aside>
 
   <div id="hit-notice" class="hit-notice hud" role="status" aria-live="polite"></div>
+  <div id="cast-notice" class="cast-notice hud" role="status" aria-live="polite"></div>
   <div id="damage-flash" aria-hidden="true"></div>
   <div id="defeat-overlay" class="defeat-overlay" hidden>
     <div class="defeat-card">
@@ -103,6 +105,15 @@
       <h2>YOU WERE DEFEATED</h2>
       <p>Read the warning zones and move before they detonate. Jump over the seismic shockwave.</p>
       <strong>PRESS R TO TRY AGAIN</strong>
+    </div>
+  </div>
+
+  <div id="victory-overlay" class="defeat-overlay victory-overlay" hidden>
+    <div class="defeat-card">
+      <span>ASHEN WARDEN LAIR</span>
+      <h2>RAVENGAR DEFEATED</h2>
+      <p>You survived the encounter and brought down the Ashen Warden.</p>
+      <strong>PRESS R TO FIGHT AGAIN</strong>
     </div>
   </div>
 
@@ -114,18 +125,23 @@
     <span id="fps">-- FPS</span>
   </div>
 
-  <footer class="hotbar hud" aria-label="Movement and demo controls">
-    <div class="hotbar-side"><span class="smallplate">ARENA</span><br><strong>Ashen Warden Lair</strong><small>01 / SURVIVAL ENCOUNTER</small></div>
+  <footer class="hotbar hud" aria-label="Mage ability hotbar">
+    <div class="hotbar-side"><span class="smallplate">MAGE · COMBAT</span><br><strong>Ashen Warden Lair</strong><small>WASD MOVE · SHIFT SPRINT</small></div>
     <div class="slots">
-      <div class="slot gold"><span class="slot-art">↑</span><kbd>W</kbd><span class="hint">FORWARD</span></div>
-      <div class="slot violet"><span class="slot-art">←</span><kbd>A</kbd><span class="hint">LEFT</span></div>
-      <div class="slot cyan"><span class="slot-art">↓</span><kbd>S</kbd><span class="hint">BACK</span></div>
-      <div class="slot violet"><span class="slot-art">→</span><kbd>D</kbd><span class="hint">RIGHT</span></div>
-      <div class="slot gold"><span class="slot-art">✦</span><kbd>SHIFT</kbd><span class="hint">SPRINT</span></div>
-      <div class="slot steel"><span class="slot-art">⇧</span><kbd>SPACE</kbd><span class="hint">JUMP</span></div>
-      <div class="slot ember"><span class="slot-art">↶</span><kbd>R</kbd><span class="hint">RESET</span></div>
+      <button type="button" class="slot violet ability-slot" data-spell="bolt" title="1 · Arcane Bolt: 12 damage, 0.65s cooldown">
+        <span class="slot-art">✦</span><kbd>1</kbd><span class="hint">ARCANE BOLT</span><span class="cd-overlay" id="cooldown-bolt" hidden></span>
+      </button>
+      <button type="button" class="slot ember ability-slot" data-spell="fireball" title="2 · Fireball: 28 damage, 3.2s cooldown">
+        <span class="slot-art">☄</span><kbd>2</kbd><span class="hint">FIREBALL</span><span class="cd-overlay" id="cooldown-fireball" hidden></span>
+      </button>
+      <button type="button" class="slot violet ability-slot" data-spell="nova" title="3 · Arcane Nova: 24 damage, close range, 6.5s cooldown">
+        <span class="slot-art">✺</span><kbd>3</kbd><span class="hint">ARCANE NOVA</span><span class="cd-overlay" id="cooldown-nova" hidden></span>
+      </button>
+      <button type="button" class="slot cyan ability-slot" data-spell="barrier" title="4 · Arcane Barrier: absorb 40 damage for 4s, 10s cooldown">
+        <span class="slot-art">⬡</span><kbd>4</kbd><span class="hint">BARRIER</span><span class="cd-overlay" id="cooldown-barrier" hidden></span>
+      </button>
     </div>
-    <div class="hotbar-side right"><span class="smallplate">VIEW</span><br><strong>DODGE TO SURVIVE</strong><small>WASD · SHIFT · SPACE · R</small></div>
+    <div class="hotbar-side right"><span class="smallplate">CONTROLS</span><br><strong>DODGE & CAST</strong><small>SPACE JUMP · R RESTART · SCROLL ZOOM</small></div>
   </footer>
 
   <div id="error" class="error" role="alert" hidden>
