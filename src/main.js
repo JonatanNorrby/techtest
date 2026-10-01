@@ -1,4 +1,4 @@
-import { createWorld } from "./world.js?v=5";
+import { createWorld } from "./world.js?v=6";
 import { BossEncounter } from "./boss.js?v=5";
 import { Player } from "./player.js?v=5";
 
