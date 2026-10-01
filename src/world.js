@@ -280,9 +280,7 @@ export function createWorld(scene) {
     "#f6e68a", "#b69740", 0);
   spellTrail("shaman-lightning", [8.7, -7.1], [2.2, 3.0],
     "#84cfff", "#347abb", 1.8);
-  const mageSource = { x: -5.7, z: -8 };
-  spellTrail("mage-arcane", () => playable ? playable.root.position : mageSource,
-    [-.85, 3.1], "#bd84ff", "#7639bc", 3.0);
+  // Mage FX now come from actual spell casts in combat.js, not a permanent beam.
 
   // Floor accent under the boss. Purely decorative — no combat system is implied.
   const decal = spot(scene, "ritual-marking", 0, 4.1, 7.15, rune, .031);
