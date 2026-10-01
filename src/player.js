@@ -19,6 +19,11 @@ export class Player {
     this.walkTime = 0;
     this.isMoving = false;
     this.isSprinting = false;
+    this.maxHp = 100;
+    this.hp = this.maxHp;
+    this.dead = false;
+    this.hurtFlash = 0;
+    this.lastDamage = null;
 
     const shade = mat(scene, "mage-contact-shadow", "#211610");
     shade.alpha = 0.2;
@@ -38,6 +43,23 @@ export class Player {
     this.walkTime = 0;
     this.visual.rotation.y = 0;
     this.visual.position.y = 0;
+    this.hp = this.maxHp;
+    this.dead = false;
+    this.hurtFlash = 0;
+    this.lastDamage = null;
+    this.isMoving = false;
+    this.isSprinting = false;
+  }
+
+  takeDamage(amount, source) {
+    if (this.dead || !Number.isFinite(amount) || amount <= 0) return false;
+    this.hp = Math.max(0, this.hp - amount);
+    this.dead = this.hp === 0;
+    this.hurtFlash = 0.45;
+    this.lastDamage = { amount, source };
+    this.isMoving = false;
+    this.isSprinting = false;
+    return true;
   }
 
   canOccupy(x, z) {
@@ -47,6 +69,8 @@ export class Player {
 
   update(dt, held, pressed) {
     if (pressed.has("KeyR")) this.reset();
+    this.hurtFlash = Math.max(0, this.hurtFlash - dt);
+    if (this.dead) return;
     const x = Number(held.has("KeyD") || held.has("ArrowRight")) -
       Number(held.has("KeyA") || held.has("ArrowLeft"));
     const z = Number(held.has("KeyW") || held.has("ArrowUp")) -
