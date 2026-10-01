@@ -229,8 +229,12 @@ export class BossEncounter {
     const location = this.player.root.position;
     const hit = attackHits(this.active, { x: location.x, y: location.y, z: location.z });
     if (hit && this.player.takeDamage(this.active.damage, this.active.name)) {
-      this.lastHit = { name: this.active.name, damage: this.active.damage };
-      this.statusText = this.active.name + " hit!";
+      const blocked = this.player.lastDamage?.absorbed || 0;
+      const actual = this.player.lastDamage?.amount ?? this.active.damage;
+      this.lastHit = { name: this.active.name, damage: actual, blocked };
+      this.statusText = actual === 0
+        ? this.active.name + " blocked!"
+        : this.active.name + " hit!";
     } else {
       this.lastHit = null;
       this.statusText = this.active.name + " dodged";
