@@ -1,6 +1,7 @@
-import { createWorld } from "./world.js?v=6";
-import { BossEncounter } from "./boss.js?v=5";
-import { Player } from "./player.js?v=5";
+import { createWorld } from "./world.js?v=7";
+import { BossEncounter } from "./boss.js?v=7";
+import { MageCombat, SPELLS } from "./combat.js?v=7";
+import { Player } from "./player.js?v=7";
 
 const canvas = document.getElementById("renderCanvas");
 const coordinateLabel = document.getElementById("coords");
@@ -15,6 +16,18 @@ const castInstruction = document.getElementById("boss-mechanic");
 const damageFlash = document.getElementById("damage-flash");
 const hitNotice = document.getElementById("hit-notice");
 const defeatOverlay = document.getElementById("defeat-overlay");
+const victoryOverlay = document.getElementById("victory-overlay");
+const bossHealthFill = document.getElementById("boss-health-fill");
+const bossHealthValue = document.getElementById("boss-health-value");
+const shieldFill = document.getElementById("mage-shield-fill");
+const shieldValue = document.getElementById("mage-shield-value");
+const castNotice = document.getElementById("cast-notice");
+const abilityButtons = Object.fromEntries(SPELLS.map(spell => [
+  spell.id, document.querySelector('[data-spell="' + spell.id + '"]')
+]));
+const abilityCooldowns = Object.fromEntries(SPELLS.map(spell => [
+  spell.id, document.getElementById("cooldown-" + spell.id)
+]));
 
 function startGame() {
   if (!window.BABYLON) throw new Error("Babylon.js could not be loaded from the CDN");
@@ -31,6 +44,10 @@ function startGame() {
   const player = new Player(scene, world);
   world.setPlayer(player);
   const encounter = new BossEncounter(scene, player);
+  const combat = new MageCombat(scene, player, encounter);
+  for (const spell of SPELLS) {
+    abilityButtons[spell.id].addEventListener("click", () => combat.cast(spell.id));
+  }
 
   // Fixed, high three-quarter orthographic camera: low-poly raid-game silhouette.
   // It follows the Mage, but does not bob up/down during a jump.
@@ -104,7 +121,8 @@ function startGame() {
   const pressed = new Set();
   const controlled = new Set([
     "KeyW", "KeyA", "KeyS", "KeyD", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight",
-    "ShiftLeft", "ShiftRight", "Space", "KeyR"
+    "ShiftLeft", "ShiftRight", "Space", "KeyR",
+    ...SPELLS.map(spell => spell.key)
   ]);
   window.addEventListener("keydown", event => {
     if (!controlled.has(event.code)) return;
@@ -131,19 +149,28 @@ function startGame() {
       // R restarts both the player's health and the boss's attack sequence.
       if (pressed.has("KeyR")) {
         encounter.reset();
+        combat.reset();
         lastDamage = null;
         noticeTime = 0;
         hitNotice.classList.remove("visible");
       }
       player.update(dt, held, pressed);
+      for (const spell of SPELLS) {
+        if (pressed.has(spell.key)) combat.cast(spell.id);
+      }
       pressed.clear();
       world.update(dt);
+      combat.update(dt);
       encounter.update(dt);
       damageFlash.style.opacity = String(Math.min(.8, player.hurtFlash * 1.5));
       defeatOverlay.hidden = !player.dead;
+      victoryOverlay.hidden = !encounter.defeated;
       if (player.lastDamage && player.lastDamage !== lastDamage) {
         lastDamage = player.lastDamage;
-        hitNotice.textContent = "-" + lastDamage.amount + " HP · " + lastDamage.source;
+        hitNotice.textContent = lastDamage.amount > 0
+          ? "-" + lastDamage.amount + " HP · " + lastDamage.source +
+            (lastDamage.absorbed ? " (" + lastDamage.absorbed + " blocked)" : "")
+          : "BLOCKED " + lastDamage.absorbed + " · " + lastDamage.source;
         hitNotice.classList.add("visible");
         noticeTime = 1.2;
       }
@@ -174,17 +201,35 @@ function startGame() {
         fpsLabel.textContent = Math.round(engine.getFps()) + " FPS";
         healthText.textContent = player.hp + " / " + player.maxHp + " HP";
         healthFill.style.width = (player.hp / player.maxHp * 100) + "%";
-        stateLabel.textContent = player.dead ? "DEFEATED · PRESS R" :
+        shieldFill.style.width = (player.shield / 40 * 100) + "%";
+        shieldValue.textContent = "SHIELD " + Math.ceil(player.shield);
+        bossHealthFill.style.width = (encounter.hp / encounter.maxHp * 100) + "%";
+        bossHealthValue.textContent = encounter.hp + " / " + encounter.maxHp + " HP";
+        stateLabel.textContent = encounter.defeated ? "VICTORY · PRESS R" :
+          player.dead ? "DEFEATED · PRESS R" :
           player.height > 0 ? "JUMPING" :
           player.isSprinting ? "SPRINTING" : player.isMoving ? "WALKING" : "IDLE";
         castInstruction.textContent = encounter.statusText;
         castFill.style.width = (encounter.progress * 100) + "%";
         castState.textContent = encounter.state === "warning" ? encounter.active.name.toUpperCase() :
           encounter.state === "impact" ? "IMPACT" :
+          encounter.defeated ? "RAVENGAR DEFEATED" :
           encounter.state === "defeated" ? "ENCOUNTER FAILED" : "RECOVERING";
         castValue.textContent = encounter.state === "warning" ?
-          encounter.time.toFixed(1) + "s" : encounter.state === "impact" ?
-          "HIT!" : encounter.state === "defeated" ? "0 HP" : "READY";
+          Math.max(0, encounter.time).toFixed(1) + "s" : encounter.state === "impact" ?
+          "HIT!" : encounter.defeated ? "WIN" :
+          encounter.state === "defeated" ? "0 HP" : "READY";
+        castNotice.textContent = combat.feedback;
+        castNotice.classList.toggle("visible",
+          combat.feedbackTime > 0 && !player.dead && !encounter.defeated);
+        for (const spell of SPELLS) {
+          const remaining = combat.cooldowns[spell.id];
+          const overlay = abilityCooldowns[spell.id];
+          overlay.hidden = remaining <= 0;
+          overlay.textContent = remaining >= 10 ? Math.ceil(remaining) : remaining.toFixed(1);
+          abilityButtons[spell.id].disabled = player.dead || encounter.defeated ||
+            remaining > 0 || combat.globalCooldown > 0;
+        }
       }
     } catch (error) {
       engine.stopRenderLoop();
