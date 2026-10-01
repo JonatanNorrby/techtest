@@ -55,20 +55,35 @@ function startGame() {
 
   let hudTimer = 0;
   engine.runRenderLoop(() => {
-    const dt = Math.min(engine.getDeltaTime() / 1000, 0.05);
-    player.update(dt, held, pressed);
-    pressed.clear();
-    world.update(dt);
+    try {
+      const dt = Math.min(engine.getDeltaTime() / 1000, 0.05);
+      player.update(dt, held, pressed);
+      pressed.clear();
+      world.update(dt);
 
-    const target = player.root.position.add(new B.Vector3(0, 1.15, 0));
-    camera.target.copyFrom(B.Vector3.Lerp(camera.target, target, Math.min(1, dt * 5.5)));
-    scene.render();
+      const target = player.root.position.add(new B.Vector3(0, 1.15, 0));
+      camera.target.copyFrom(B.Vector3.Lerp(camera.target, target, Math.min(1, dt * 5.5)));
+      scene.render();
 
-    hudTimer += dt;
-    if (hudTimer > 0.2) {
-      hudTimer = 0;
-      coordinateLabel.textContent = "X: " + player.root.position.x.toFixed(1) + "   Z: " + player.root.position.z.toFixed(1);
-      fpsLabel.textContent = Math.round(engine.getFps()) + " FPS";
+      if (!window.techtestReady) {
+        window.techtestReady = true;
+        document.body.classList.add("is-ready");
+        document.getElementById("boot-status").textContent = "LIVE";
+      }
+      hudTimer += dt;
+      if (hudTimer > 0.2) {
+        hudTimer = 0;
+        coordinateLabel.textContent =
+          "X: " + player.root.position.x.toFixed(1) +
+          "   Y: " + player.root.position.y.toFixed(1) +
+          "   Z: " + player.root.position.z.toFixed(1);
+        fpsLabel.textContent = Math.round(engine.getFps()) + " FPS";
+      }
+    } catch (error) {
+      engine.stopRenderLoop();
+      window.techtestReady = false;
+      window.techtestError("Render loop failed: " + (error.message || String(error)));
+      console.error(error);
     }
   });
   window.addEventListener("resize", () => engine.resize());
@@ -78,5 +93,5 @@ try {
   startGame();
 } catch (error) {
   console.error("3D playground initialization failed:", error);
-  errorPanel.hidden = false;
+  window.techtestError(error.message || String(error));
 }
