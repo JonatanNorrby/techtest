@@ -30,6 +30,7 @@ export function createWorld(scene) {
   const colliders = [];
   const animations = [];
   let elapsed = 0;
+  let playable = null;
 
   scene.clearColor = B.Color4.FromHexString("#402d23ff");
   scene.ambientColor = B.Color3.FromHexString("#423127");
@@ -224,8 +225,8 @@ export function createWorld(scene) {
   const arcCount = 20;
   for (let i = 0; i <= arcCount; i++) {
     const a = (-0.45 + i * (0.90 / arcCount));
-    const px = Math.cos(a) * 7.15;
-    const pz = 4.1 + Math.sin(a) * 7.15;
+    const px = Math.cos(a) * 16.25;
+    const pz = 4.1 + Math.sin(a) * 16.25;
     telegraphPositions.push(px, .056, pz);
     edgePoints.push(new B.Vector3(px, .067, pz));
     if (i > 0) telegraphIndices.push(0, i + 1, i);
@@ -243,29 +244,49 @@ export function createWorld(scene) {
   edgeLine.alpha = 0.72;
 
   // Warm gold and electric-blue spell trails demonstrate the art style, not combat.
-  function spellTrail(name, from, to, tint, glowTint, phase) {
-    const color = mat(scene, name + "-magic", tint, glowTint);
-    const orbs = [];
-    for (let i = 0; i < 15; i++) {
-      const t = i / 14;
-      const orb = mesh(scene, name + "-spark", "CreateSphere",
-        { diameter: i === 14 ? .36 : .09 + t * .095, segments: 6 },
-        color, from[0] + (to[0] - from[0]) * t,
-        1.48 + Math.sin(t * Math.PI) * .43,
-        from[1] + (to[1] - from[1]) * t);
-      orbs.push({ orb, t, y: orb.position.y });
-    }
+  function spellTrail(name, fromSource, to, tint, glowTint, phase) {
+    const light = mat(scene, name + "-beam", tint, glowTint);
+    const halo = mat(scene, name + "-halo", tint, glowTint);
+    halo.alpha = .19;
+    halo.backFaceCulling = false;
+    const getFrom = typeof fromSource === "function" ? fromSource : () => fromSource;
+    const point = (t, time, from) => new B.Vector3(
+      from[0] + (to[0] - from[0]) * t + Math.sin(t * 21 + time * 6 + phase) * .045,
+      1.38 + Math.sin(t * Math.PI) * .47 + Math.sin(t * 16 - time * 5 + phase) * .07,
+      from[1] + (to[1] - from[1]) * t + Math.cos(t * 23 - time * 4) * .045
+    );
+    const initial = getFrom();
+    const path = Array.from({length:23}, (_,i) => point(i/22,0,initial));
+    let beam = B.MeshBuilder.CreateTube(name+"-luminous-core",
+      {path,radius:.072,tessellation:6,updatable:true},scene);
+    beam.material=light;
+    let surround=B.MeshBuilder.CreateTube(name+"-outer-halo",
+      {path,radius:.21,tessellation:7,updatable:true},scene);
+    surround.material=halo;
+    const orbs = Array.from({length:16},(_,i)=>{
+      const t=i/15;
+      const orb=mesh(scene,name+"-magic-spark","CreateSphere",
+        {diameter:i===15?.43:.07+t*.12,segments:7},light,0,0,0);
+      return {orb,t};
+    });
     animations.push(() => {
-      for (const { orb, t, y } of orbs) {
-        const wobble = Math.sin(elapsed * 5.8 + t * 13 + phase);
-        orb.position.y = y + wobble * .085;
-        const pulse = 0.85 + .2 * Math.sin(elapsed * 8 - t * 18 + phase);
-        orb.scaling.setAll(pulse);
+      const from=getFrom();
+      const points=path.map((_,i)=>point(i/22,elapsed,from));
+      beam=B.MeshBuilder.CreateTube(name+"-luminous-core",
+        {path:points,radius:.072,tessellation:6,instance:beam},scene);
+      surround=B.MeshBuilder.CreateTube(name+"-outer-halo",
+        {path:points,radius:.21,tessellation:7,instance:surround},scene);
+      for(const {orb,t} of orbs){
+        orb.position.copyFrom(point(t,elapsed,from));
+        orb.scaling.setAll(.72+.30*Math.sin(elapsed*8-t*17+phase));
       }
     });
   }
-  spellTrail("priest-healing-light", [-10, 1.6], [-2.35, 4.0], "#ffe79b", "#bc9138", 0);
-  spellTrail("shaman-lightning", [8.7, -7.1], [2.2, 3.0], "#8dd7ff", "#307cbb", 1.8);
+  spellTrail("priest-healing-light",[-10,1.6],[-2.35,4.0],"#f6e68a","#b69740",0);
+  spellTrail("shaman-lightning",[8.7,-7.1],[2.2,3.0],"#84cfff","#347abb",1.8);
+  spellTrail("mage-arcane",()=>playable?
+    [playable.root.position.x,playable.root.position.z]:[-5.7,-8],
+    [-.85,3.1],"#bd84ff","#7639bc",3.0);
 
   // Floor accent under the boss. Purely decorative — no combat system is implied.
   const decal = spot(scene, "ritual-marking", 0, 4.1, 7.15, rune, .031);
@@ -276,6 +297,7 @@ export function createWorld(scene) {
     colliders,
     inside,
     lighting: { sun, ground },
+    setPlayer(player) { playable = player; },
     update(dt) {
       elapsed += dt;
       for (const animate of animations) animate(dt);
