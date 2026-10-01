@@ -15,7 +15,7 @@ export class Player {
   constructor(scene, world) {
     this.world = world;
     this.root = new B.TransformNode("player-root", scene);
-    this.root.position.copyFrom(SPAWN);
+    this.root.position.copyFromFloats(SPAWN.x, SPAWN.y, SPAWN.z);
     this.visual = new B.TransformNode("player-visual", scene);
     this.visual.parent = this.root;
     this.height = 0;
@@ -57,7 +57,7 @@ export class Player {
   }
 
   reset() {
-    this.root.position.copyFrom(SPAWN);
+    this.root.position.copyFromFloats(SPAWN.x, SPAWN.y, SPAWN.z);
     this.height = 0;
     this.verticalSpeed = 0;
     this.visual.rotation.y = 0;
