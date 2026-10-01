@@ -1,5 +1,5 @@
-import { createWorld } from "./world.js?v=3";
-import { Player } from "./player.js?v=3";
+import { createWorld } from "./world.js?v=4";
+import { Player } from "./player.js?v=4";
 
 const canvas = document.getElementById("renderCanvas");
 const coordinateLabel = document.getElementById("coords");
@@ -11,10 +11,13 @@ function startGame() {
   const B = window.BABYLON;
   if (!B.Engine.isSupported()) throw new Error("WebGL is unavailable in this browser");
 
-  const engine = new B.Engine(canvas, true, { stencil: true }, false);
+  const engine = new B.Engine(canvas, true, { stencil: true, preserveDrawingBuffer: false }, true);
+  // Aim for crisp rendering on dense displays, capped for reasonable GPU load.
+  engine.setHardwareScalingLevel(Math.max(1, (window.devicePixelRatio || 1) / 1.5));
   const scene = new B.Scene(engine);
   const world = createWorld(scene);
   const player = new Player(scene, world);
+  world.setPlayer(player);
 
   // Fixed, high three-quarter orthographic camera: low-poly raid-game silhouette.
   // It follows the Mage, but does not bob up/down during a jump.
@@ -26,6 +29,49 @@ function startGame() {
   camera.minZ = 0.1;
   camera.maxZ = 170;
   scene.activeCamera = camera;
+
+  // These optional visual passes are isolated so unsupported GPU features
+  // cannot prevent movement or leave the test as a static HTML page.
+  try {
+    const settings = scene.imageProcessingConfiguration;
+    settings.contrast = 1.15;
+    settings.exposure = 1.08;
+    settings.toneMappingEnabled = true;
+    if (B.DefaultRenderingPipeline) {
+      const pipeline = new B.DefaultRenderingPipeline("cinematic-fantasy", true, scene, [camera]);
+      pipeline.fxaaEnabled = true;
+      pipeline.bloomEnabled = true;
+      pipeline.bloomThreshold = .68;
+      pipeline.bloomWeight = .22;
+      pipeline.bloomKernel = 48;
+    }
+  } catch (e) { console.warn("Optional post-processing unavailable:", e); }
+  try {
+    if (B.GlowLayer) {
+      const glow = new B.GlowLayer("lava-and-magic-glow", scene, { blurKernelSize: 32 });
+      glow.intensity = .31;
+      for (const mesh of scene.meshes) {
+        if (/lava|ember|hot|eye-glow|flame|spark|core|magic|beam|halo|warning|rune-tick|staff-flame|fissure/i.test(mesh.name)) {
+          glow.addIncludedOnlyMesh(mesh);
+        }
+      }
+    }
+  } catch (e) { console.warn("Optional glow unavailable:", e); }
+  try {
+    if (B.ShadowGenerator) {
+      const shadows = new B.ShadowGenerator(1024, world.lighting.sun);
+      shadows.useBlurExponentialShadowMap = true;
+      shadows.blurKernel = 14;
+      for (const mesh of scene.meshes) {
+        if (/^(sentinel-|Mage-|Priest-|Warrior-|Shaman-)/.test(mesh.name) &&
+            !/plate-material|nameplate|selection|rune-tick|eye|fissure|heart|magic|spark|glow/.test(mesh.name)) {
+          shadows.addShadowCaster(mesh);
+        }
+        if (/paver|arena-floor/.test(mesh.name)) mesh.receiveShadows = true;
+      }
+      world.lighting.ground.receiveShadows = true;
+    }
+  } catch (e) { console.warn("Optional shadows unavailable:", e); }
 
   let halfHeight = 16.5;
   function sizeCamera() {
