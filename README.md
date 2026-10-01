@@ -6,7 +6,7 @@ A lightweight Babylon.js high-detail isometric **boss-dodging prototype**, hoste
 
 Visit **https://jonatannorrby.github.io/techtest/** after the GitHub Actions Pages deployment completes.
 
-The playable Mage has **100 HP**. Ravengar repeats three real, telegraphed attacks:
+The playable Mage has **100 HP** and four combat abilities. Ravengar has **260 real HP** and repeats three telegraphed attacks. Kill him while dodging to win:
 
 | Attack | Warning | Damage | How to avoid |
 | --- | --- | --- | --- |
@@ -14,7 +14,20 @@ The playable Mage has **100 HP**. Ravengar repeats three real, telegraphed attac
 | Ashen Cleave | Directional orange cone, 1.75 s | 32 | Move out of the cone before it resolves. |
 | Seismic Shockwave | Large donut warning ring, 2 s | 35 | Reach the inner safe area, move beyond the outer edge, **or jump over it** (be airborne at impact). |
 
-The boss aims at the player's position **when each telegraph first appears**, giving time to react. There is an approximately one-second recovery between abilities. If HP reaches zero, movement stops and a defeat screen appears. Press **R** to restart at full HP and restart the attack sequence. NPC party frames and boss HP remain decorative: there is no player offense or multiplayer yet.
+The boss aims at the player's position **when each telegraph first appears**, giving time to react. There is an approximately one-second recovery between abilities. If HP reaches zero, movement stops and a defeat screen appears. Press **R** to restart at full HP and restart the attack sequence. NPC party frames remain decorative; the boss HP bar now shows his real health, while a separate bar tracks his cast. There is no multiplayer yet.
+
+### Mage combat (v7)
+
+| Key | Spell | Effect | Cooldown |
+| --- | --- | --- | --- |
+| 1 | Arcane Bolt | A lightweight purple homing projectile, 12 damage | 0.65 s |
+| 2 | Fireball | A larger orange projectile with impact pulse, 28 damage | 3.2 s |
+| 3 | Arcane Nova | Instant close-range expanding magic ring, 24 damage | 6.5 s |
+| 4 | Arcane Barrier | Blue aura that absorbs 40 incoming damage for 4 s | 10 s |
+
+Attacks auto-target Ravengar. Each offensive spell checks range before casting; Nova requires you to move close. There is a 0.25-second shared casting lockout and visible cooldown overlays. You can cast while moving, sprinting or jumping. The Mage performs a brief pose/scale pulse when casting. The four hotbar buttons can also be clicked. Successful damage drains Ravengar's 260 HP; at zero he stops attacking and a victory screen appears. Press **R** to reset the boss, player, cooldowns and temporary effects.
+
+Barrier absorbs damage before health; any excess reduces HP. The mini blue meter in the Mage party frame represents the current shield, not mana. Projectile and ring graphics are generated from small Babylon primitives, animated in place and disposed when done.
 
 ### Controls
 
@@ -24,6 +37,7 @@ The boss aims at the player's position **when each telegraph first appears**, gi
 | Shift | Sprint |
 | Space | Jump |
 | R | Restart / reset position and health |
+| 1, 2, 3, 4 | Mage abilities (also clickable) |
 | Mouse wheel | Zoom |
 
 Your real HP and current cast appear in the fantasy HUD, with hit feedback and a red screen flash when damaged. Actual warning areas appear only while the corresponding attack is charging. Animated NPC spell trails are atmospheric.
@@ -38,11 +52,12 @@ The included .github/workflows/deploy.yml publishes the repository to GitHub Pag
 
 ## Structure
 
-- src/boss.js: encounter state machine, independent attack hit tests and telegraph meshes.
-- src/player.js: movement, HP, damage and death/reset.
-- src/main.js: encounter and player updates, camera, rendering and HUD.
+- src/boss.js: encounter state machine, real boss HP, victory, independent hit tests and telegraph meshes.
+- src/combat.js: ability definitions, cooldowns, range checks and lightweight procedural cast animations.
+- src/player.js: movement, HP, shield absorption, cast pose and death/reset.
+- src/main.js: encounter, combat and player updates, camera, rendering and live cooldown HUD.
 - src/world.js, src/detail.js, src/actors.js: visual arena, props and characters.
-- index.html, styles.css: HUD, cast bar, damage effects and defeat screen.
+- index.html, styles.css: ability hotbar, cooldown overlays, HP/cast bars, damage feedback and victory/defeat screens.
 
 The environment has a procedurally drawn 1024-pixel sandstone texture, detailed individual tiles, ruins, banners, lava effects and an armored ash titan. Optional post-processing adds bloom, glow, FXAA and soft shadows, with graceful fallbacks.
 
