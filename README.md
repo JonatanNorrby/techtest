@@ -45,3 +45,15 @@ The included .github/workflows/deploy.yml publishes the repository to GitHub Pag
 - index.html, styles.css: HUD, cast bar, damage effects and defeat screen.
 
 The environment has a procedurally drawn 1024-pixel sandstone texture, detailed individual tiles, ruins, banners, lava effects and an armored ash titan. Optional post-processing adds bloom, glow, FXAA and soft shadows, with graceful fallbacks.
+
+
+## Performance optimization (v6)
+
+The high-detail visual settings (resolution, textures, colors, bloom, glow, FXAA and shadow quality) are retained. To reduce overhead without removing scenery:
+- The existing 438 individually modeled paving stones are combined into four draw batches, one per original material.
+- Static arena engravings and cracks are grouped into five line-system batches by their exact original colors and paths.
+- Spell trails reuse Babylon tube buffers and Vector3 objects; tube geometry updates up to 30 times per second, while spark animations still update every frame.
+- Unmoving scenery world matrices are frozen, animated character/embers/boss meshes are not.
+- The fixed-angle following camera reuses its vectors, rather than re-aiming every frame.
+
+These are structural/source-level optimizations; actual FPS varies by display, GPU and browser. The FPS counter in-game can be used to compare before and after.
