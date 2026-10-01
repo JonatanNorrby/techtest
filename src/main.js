@@ -1,5 +1,5 @@
-import { createWorld } from "./world.js";
-import { Player } from "./player.js";
+import { createWorld } from "./world.js?v=2";
+import { Player } from "./player.js?v=2";
 
 const canvas = document.getElementById("renderCanvas");
 const errorPanel = document.getElementById("error");
