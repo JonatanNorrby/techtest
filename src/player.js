@@ -24,6 +24,9 @@ export class Player {
     this.dead = false;
     this.hurtFlash = 0;
     this.lastDamage = null;
+    this.shield = 0;
+    this.shieldTime = 0;
+    this.castAnimation = 0;
 
     const shade = mat(scene, "mage-contact-shadow", "#211610");
     shade.alpha = 0.2;
@@ -47,16 +50,36 @@ export class Player {
     this.dead = false;
     this.hurtFlash = 0;
     this.lastDamage = null;
+    this.shield = 0;
+    this.shieldTime = 0;
+    this.castAnimation = 0;
+    this.visual.scaling.setAll(1);
+    this.visual.rotation.z = 0;
     this.isMoving = false;
     this.isSprinting = false;
   }
 
+  grantShield(amount, duration) {
+    if (this.dead || amount <= 0 || duration <= 0) return false;
+    this.shield = amount;
+    this.shieldTime = duration;
+    return true;
+  }
+
+  triggerCastAnimation() {
+    if (!this.dead) this.castAnimation = .32;
+  }
+
   takeDamage(amount, source) {
     if (this.dead || !Number.isFinite(amount) || amount <= 0) return false;
-    this.hp = Math.max(0, this.hp - amount);
+    const absorbed = Math.min(amount, this.shield);
+    this.shield = Math.max(0, this.shield - absorbed);
+    if (this.shield === 0) this.shieldTime = 0;
+    const healthDamage = amount - absorbed;
+    this.hp = Math.max(0, this.hp - healthDamage);
     this.dead = this.hp === 0;
-    this.hurtFlash = 0.45;
-    this.lastDamage = { amount, source };
+    this.hurtFlash = healthDamage > 0 ? 0.45 : .12;
+    this.lastDamage = { amount: healthDamage, absorbed, source };
     this.isMoving = false;
     this.isSprinting = false;
     return true;
@@ -70,6 +93,12 @@ export class Player {
   update(dt, held, pressed) {
     if (pressed.has("KeyR")) this.reset();
     this.hurtFlash = Math.max(0, this.hurtFlash - dt);
+    this.shieldTime = Math.max(0, this.shieldTime - dt);
+    if (this.shieldTime === 0) this.shield = 0;
+    this.castAnimation = Math.max(0, this.castAnimation - dt);
+    const anim = this.castAnimation > 0 ? Math.sin((.32 - this.castAnimation) / .32 * Math.PI) : 0;
+    this.visual.scaling.setAll(1 + anim * .055);
+    this.visual.rotation.z = -anim * .085;
     if (this.dead) return;
     const x = Number(held.has("KeyD") || held.has("ArrowRight")) -
       Number(held.has("KeyA") || held.has("ArrowLeft"));
