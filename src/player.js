@@ -1,5 +1,5 @@
 const B = window.BABYLON;
-const SPAWN = new B.Vector3(0, 0, 0);
+const SPAWN = { x: 0, y: 0, z: 0 };
 const WALK_SPEED = 5.4;
 const RUN_SPEED = 9.1;
 const PLAYER_RADIUS = 0.43;
