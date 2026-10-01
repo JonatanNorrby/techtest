@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#101b20" />
+  <meta name="description" content="A tiny 3D movement playground made with Babylon.js." />
+  <title>Techtest · 3D Playground</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <script defer src="https://cdn.babylonjs.com/babylon.js"></script>
+  <script defer type="module" src="./src/main.js"></script>
+</head>
+<body>
+  <canvas id="renderCanvas" aria-label="3D game world"></canvas>
+  <div class="vignette" aria-hidden="true"></div>
+  <header class="hud top-left">
+    <div class="eyebrow"><span class="status-dot"></span> BABYLON.JS EXPERIMENT 001</div>
+    <h1>THE LITTLE OUTPOST</h1>
+    <p>Take a walk. See what you find.</p>
+  </header>
+  <aside class="hud controls" aria-label="Game controls">
+    <span class="controls-title">CONTROLS</span>
+    <div class="control"><span>Move</span><span class="keys"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span></div>
+    <div class="control"><span>Sprint</span><kbd>SHIFT</kbd></div>
+    <div class="control"><span>Jump</span><kbd>SPACE</kbd></div>
+    <div class="control"><span>Reset position</span><kbd>R</kbd></div>
+    <div class="control"><span>Camera zoom</span><span>SCROLL</span></div>
+  </aside>
+  <div class="hud bottom-left">
+    <span class="tag">FREE ROAM</span>
+    <span id="coords" aria-live="off">X: 0.0 &nbsp; Z: 0.0</span>
+    <span id="fps">-- FPS</span>
+  </div>
+  <div class="crosshair" aria-hidden="true">+</div>
+  <div id="error" class="error" role="alert" hidden>
+    <strong>Could not start the 3D scene.</strong><br />
+    Check that WebGL is enabled and the Babylon.js CDN can be reached.
+  </div>
+</body>
+</html>
