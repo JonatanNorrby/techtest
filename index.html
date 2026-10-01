@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#281c17">
+  <meta name="theme-color" content="#20150f">
   <meta name="description" content="A walkable Babylon.js low-poly fantasy style study.">
-  <title>Techtest — The Ember Arena</title>
-  <link rel="stylesheet" href="./styles.css?v=3">
+  <title>Techtest — Ashen Warden's Lair</title>
+  <link rel="stylesheet" href="./styles.css?v=4">
   <script>
     window.techtestReady = false;
     window.techtestError = function (detail) {
@@ -38,7 +38,7 @@
     });
   </script>
   <script defer src="https://cdn.babylonjs.com/babylon.js"></script>
-  <script defer type="module" src="./src/main.js?v=3"></script>
+  <script defer type="module" src="./src/main.js?v=4"></script>
 </head>
 <body>
   <canvas id="renderCanvas" aria-label="Walkable 3D fantasy arena"></canvas>
@@ -46,13 +46,13 @@
   <div class="grain" aria-hidden="true"></div>
 
   <header class="party hud" aria-label="Decorative character roster">
-    <div class="party-heading"><span class="gold-dash"></span> THE EMBER ARENA <span class="subtitle">VISUAL PARTY</span></div>
+    <div class="party-heading"><span class="gold-dash"></span> ASHEN WARDEN LAIR <span class="subtitle">PARTY PREVIEW</span></div>
     <div class="party-member priest">
       <span class="portrait"><span>✦</span></span>
       <div class="member-body">
         <div class="member-name">Priest <small>NPC</small></div>
         <div class="vitals"><span class="fill red" style="width:76%"></span></div>
-        <div class="vitals mini"><span class="fill mana" style="width:53%"></span></div>
+        <div class="vitals mini"><span class="fill mana" style="width:53%"></span></div><div class="buffs"><i>✦</i><i>☼</i><i>✧</i></div>
       </div>
     </div>
     <div class="party-member warrior">
@@ -60,7 +60,7 @@
       <div class="member-body">
         <div class="member-name">Warrior <small>NPC</small></div>
         <div class="vitals"><span class="fill red" style="width:84%"></span></div>
-        <div class="vitals mini"><span class="fill mana" style="width:68%"></span></div>
+        <div class="vitals mini"><span class="fill mana" style="width:68%"></span></div><div class="buffs"><i>⬡</i><i>✥</i><i>✦</i></div>
       </div>
     </div>
     <div class="party-member mage active">
@@ -68,7 +68,7 @@
       <div class="member-body">
         <div class="member-name">Mage <small>YOU</small></div>
         <div class="vitals"><span class="fill red" style="width:100%"></span></div>
-        <div class="vitals mini"><span class="fill mana" style="width:100%"></span></div>
+        <div class="vitals mini"><span class="fill mana" style="width:100%"></span></div><div class="buffs"><i>✧</i><i>◈</i><i>✺</i></div>
       </div>
     </div>
     <div class="party-member shaman">
@@ -76,20 +76,23 @@
       <div class="member-body">
         <div class="member-name">Shaman <small>NPC</small></div>
         <div class="vitals"><span class="fill red" style="width:100%"></span></div>
-        <div class="vitals mini"><span class="fill mana" style="width:44%"></span></div>
+        <div class="vitals mini"><span class="fill mana" style="width:44%"></span></div><div class="buffs"><i>↯</i><i>❖</i><i>☼</i></div>
       </div>
     </div>
   </header>
 
-  <div class="boss-frame hud" aria-label="Decorative training sentinel indicator">
-    <div class="boss-name">Stone Sentinel</div>
-    <div class="boss-track"><span class="boss-fill"></span></div>
-    <div class="boss-caption">TRAINING SCENE · NO COMBAT</div>
+  <div class="boss-frame hud" aria-label="Decorative boss preview">
+    <div class="boss-emblem">♜</div>
+    <div class="boss-main">
+      <div class="boss-top"><span>RAVENGAR, THE ASHEN</span><small>VISUAL TARGET</small></div>
+      <div class="boss-track"><span class="boss-fill"></span><span class="boss-value">DEMO</span></div>
+      <div class="boss-effects"><i>♨</i><i>✦</i><i>⬡</i><span>THE ASHEN WARDEN · NON-COMBAT PREVIEW</span></div>
+    </div>
   </div>
 
   <aside class="scene-label hud" aria-label="Game status">
     <span class="status-light"></span> <span id="boot-status">LOADING 3D</span>
-    <div>LOW-POLY FANTASY STUDY</div>
+    <div>BABYLON.JS · HIGH DETAIL STUDY</div>
   </aside>
 
   <div class="readout hud" aria-live="off">
@@ -101,7 +104,7 @@
   </div>
 
   <footer class="hotbar hud" aria-label="Movement and demo controls">
-    <div class="hotbar-side">MOVEMENT<br><strong>TEST AREA</strong></div>
+    <div class="hotbar-side"><span class="smallplate">ARENA</span><br><strong>Ashen Warden Lair</strong><small>01 / VISUAL PROTOTYPE</small></div>
     <div class="slots">
       <div class="slot gold"><span class="slot-art">↑</span><kbd>W</kbd><span class="hint">FORWARD</span></div>
       <div class="slot violet"><span class="slot-art">←</span><kbd>A</kbd><span class="hint">LEFT</span></div>
@@ -111,7 +114,7 @@
       <div class="slot steel"><span class="slot-art">⇧</span><kbd>SPACE</kbd><span class="hint">JUMP</span></div>
       <div class="slot ember"><span class="slot-art">↶</span><kbd>R</kbd><span class="hint">RESET</span></div>
     </div>
-    <div class="hotbar-side right">SCROLL<br><strong>ZOOM</strong></div>
+    <div class="hotbar-side right"><span class="smallplate">VIEW</span><br><strong>SCROLL TO ZOOM</strong><small>WASD · SHIFT · SPACE · R</small></div>
   </footer>
 
   <div id="error" class="error" role="alert" hidden>
