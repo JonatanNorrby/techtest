@@ -165,7 +165,10 @@ export class BossEncounter {
       wedge.rotation.y = -attack.angle;
       // Babylon's positive Y rotation points +X toward -Z.
       for (const side of [-half, half]) {
-        const border = this.track(arc(B, scene, "cleave-edge", radius, side, side, 1));
+        const end = new B.Vector3(Math.cos(side) * radius, .19, Math.sin(side) * radius);
+        const border = this.track(B.MeshBuilder.CreateLines("cleave-edge",
+          { points: [new B.Vector3(0, .19, 0), end] }, scene));
+        border.color = B.Color3.FromHexString("#ffb16a");
         border.position.set(BOSS_POSITION.x, 0, BOSS_POSITION.z);
         border.rotation.y = -attack.angle;
       }
