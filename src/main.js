@@ -1,10 +1,20 @@
-import { createWorld } from "./world.js?v=4";
-import { Player } from "./player.js?v=4";
+import { createWorld } from "./world.js?v=5";
+import { BossEncounter } from "./boss.js?v=5";
+import { Player } from "./player.js?v=5";
 
 const canvas = document.getElementById("renderCanvas");
 const coordinateLabel = document.getElementById("coords");
 const fpsLabel = document.getElementById("fps");
 const stateLabel = document.getElementById("state-label");
+const healthFill = document.getElementById("mage-health-fill");
+const healthText = document.getElementById("mage-hp");
+const castFill = document.getElementById("boss-cast-fill");
+const castState = document.getElementById("boss-phase");
+const castValue = document.getElementById("boss-value");
+const castInstruction = document.getElementById("boss-mechanic");
+const damageFlash = document.getElementById("damage-flash");
+const hitNotice = document.getElementById("hit-notice");
+const defeatOverlay = document.getElementById("defeat-overlay");
 
 function startGame() {
   if (!window.BABYLON) throw new Error("Babylon.js could not be loaded from the CDN");
@@ -18,6 +28,7 @@ function startGame() {
   const world = createWorld(scene);
   const player = new Player(scene, world);
   world.setPlayer(player);
+  const encounter = new BossEncounter(scene, player);
 
   // Fixed, high three-quarter orthographic camera: low-poly raid-game silhouette.
   // It follows the Mage, but does not bob up/down during a jump.
@@ -109,12 +120,32 @@ function startGame() {
   }, { passive: false });
 
   let hudTime = 0;
+  let noticeTime = 0;
+  let lastDamage = null;
   engine.runRenderLoop(() => {
     try {
       const dt = Math.min(engine.getDeltaTime() / 1000, 0.05);
+      // R restarts both the player's health and the boss's attack sequence.
+      if (pressed.has("KeyR")) {
+        encounter.reset();
+        lastDamage = null;
+        noticeTime = 0;
+        hitNotice.classList.remove("visible");
+      }
       player.update(dt, held, pressed);
       pressed.clear();
       world.update(dt);
+      encounter.update(dt);
+      damageFlash.style.opacity = String(Math.min(.8, player.hurtFlash * 1.5));
+      defeatOverlay.hidden = !player.dead;
+      if (player.lastDamage && player.lastDamage !== lastDamage) {
+        lastDamage = player.lastDamage;
+        hitNotice.textContent = "-" + lastDamage.amount + " HP · " + lastDamage.source;
+        hitNotice.classList.add("visible");
+        noticeTime = 1.2;
+      }
+      noticeTime = Math.max(0, noticeTime - dt);
+      if (!noticeTime) hitNotice.classList.remove("visible");
 
       const goal = new B.Vector3(player.root.position.x, 0, player.root.position.z);
       B.Vector3.LerpToRef(focus, goal, Math.min(1, dt * 4.3), focus);
@@ -137,8 +168,19 @@ function startGame() {
           "   Y: " + player.root.position.y.toFixed(1) +
           "   Z: " + player.root.position.z.toFixed(1);
         fpsLabel.textContent = Math.round(engine.getFps()) + " FPS";
-        stateLabel.textContent = player.height > 0 ? "JUMPING" :
+        healthText.textContent = player.hp + " / " + player.maxHp + " HP";
+        healthFill.style.width = (player.hp / player.maxHp * 100) + "%";
+        stateLabel.textContent = player.dead ? "DEFEATED · PRESS R" :
+          player.height > 0 ? "JUMPING" :
           player.isSprinting ? "SPRINTING" : player.isMoving ? "WALKING" : "IDLE";
+        castInstruction.textContent = encounter.statusText;
+        castFill.style.width = (encounter.progress * 100) + "%";
+        castState.textContent = encounter.state === "warning" ? encounter.active.name.toUpperCase() :
+          encounter.state === "impact" ? "IMPACT" :
+          encounter.state === "defeated" ? "ENCOUNTER FAILED" : "RECOVERING";
+        castValue.textContent = encounter.state === "warning" ?
+          encounter.time.toFixed(1) + "s" : encounter.state === "impact" ?
+          "HIT!" : encounter.state === "defeated" ? "0 HP" : "READY";
       }
     } catch (error) {
       engine.stopRenderLoop();
