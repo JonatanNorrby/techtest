@@ -88,7 +88,7 @@ export class MageCombat {
     const material = color === "fire" ? this.fire : this.arcane;
     const mesh = B.MeshBuilder.CreateTorus("player-spell-impact-ring",
       { diameter: 1, thickness: .09, tessellation: 32 }, this.scene);
-    mesh.rotation.x = Math.PI / 2;
+    // CreateTorus lies in the ground (XZ) plane by default.
     mesh.position.set(x, y, z);
     mesh.material = material;
     mesh.isPickable = false;
