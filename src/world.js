@@ -214,34 +214,7 @@ export function createWorld(scene) {
     animations.push(() => { unit.visual.position.y = Math.sin(elapsed * 2.1 + x) * 0.025; });
   }
 
-  // A translucent orange practice wedge, visually echoing raid encounter telegraphs.
-  // It is a visual demonstration only, not a damaging area or real attack.
-  const warningMat = mat(scene, "practice-warning", "#c8583c", "#6c281d");
-  warningMat.alpha = 0.27;
-  warningMat.backFaceCulling = false;
-  const telegraphPositions = [0, 0.056, 4.1];
-  const telegraphIndices = [];
-  const edgePoints = [];
-  const arcCount = 20;
-  for (let i = 0; i <= arcCount; i++) {
-    const a = (-0.45 + i * (0.90 / arcCount));
-    const px = Math.cos(a) * 16.25;
-    const pz = 4.1 + Math.sin(a) * 16.25;
-    telegraphPositions.push(px, .056, pz);
-    edgePoints.push(new B.Vector3(px, .067, pz));
-    if (i > 0) telegraphIndices.push(0, i + 1, i);
-  }
-  const wedge = new B.Mesh("decorative-training-cone", scene);
-  const wedgeData = new B.VertexData();
-  wedgeData.positions = telegraphPositions;
-  wedgeData.indices = telegraphIndices;
-  wedgeData.normals = [];
-  B.VertexData.ComputeNormals(telegraphPositions, telegraphIndices, wedgeData.normals);
-  wedgeData.applyToMesh(wedge);
-  wedge.material = warningMat;
-  const edgeLine = B.MeshBuilder.CreateLines("practice-cone-edge", { points: edgePoints }, scene);
-  edgeLine.color = B.Color3.FromHexString("#f17b56");
-  edgeLine.alpha = 0.72;
+  // Actual warnings/damage geometry is supplied by BossEncounter at cast time.
 
   // Warm gold and electric-blue spell trails demonstrate the art style, not combat.
   function spellTrail(name, fromSource, to, tint, glowTint, phase) {
