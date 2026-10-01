@@ -1,14 +1,13 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#101b20" />
-  <meta name="description" content="A tiny 3D movement playground made with Babylon.js." />
-  <title>Techtest · 3D Playground</title>
-  <link rel="stylesheet" href="./styles.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#281c17">
+  <meta name="description" content="A walkable Babylon.js low-poly fantasy style study.">
+  <title>Techtest — The Ember Arena</title>
+  <link rel="stylesheet" href="./styles.css?v=3">
   <script>
-    // Visible errors even if the Babylon CDN or an ES module fails before main.js runs.
     window.techtestReady = false;
     window.techtestError = function (detail) {
       const panel = document.getElementById("error");
@@ -33,39 +32,91 @@
     window.addEventListener("load", function () {
       setTimeout(function () {
         if (!window.techtestReady && document.getElementById("error").hidden) {
-          window.techtestError("The 3D game never started. Check the browser console and Network tab for blocked scripts.");
+          window.techtestError("3D scene did not start. Check the browser console for blocked scripts.");
         }
-      }, 5000);
+      }, 6500);
     });
   </script>
   <script defer src="https://cdn.babylonjs.com/babylon.js"></script>
-  <script defer type="module" src="./src/main.js?v=2"></script>
+  <script defer type="module" src="./src/main.js?v=3"></script>
 </head>
 <body>
-  <canvas id="renderCanvas" aria-label="3D game world"></canvas>
+  <canvas id="renderCanvas" aria-label="Walkable 3D fantasy arena"></canvas>
   <div class="vignette" aria-hidden="true"></div>
-  <header class="hud top-left">
-    <div class="eyebrow"><span class="status-dot"></span> <span id="boot-status">LOADING 3D</span> · BABYLON.JS EXPERIMENT 001</div>
-    <h1>THE LITTLE OUTPOST</h1>
-    <p>Take a walk. See what you find.</p>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="party hud" aria-label="Decorative character roster">
+    <div class="party-heading"><span class="gold-dash"></span> THE EMBER ARENA <span class="subtitle">VISUAL PARTY</span></div>
+    <div class="party-member priest">
+      <span class="portrait"><span>✦</span></span>
+      <div class="member-body">
+        <div class="member-name">Priest <small>NPC</small></div>
+        <div class="vitals"><span class="fill red" style="width:76%"></span></div>
+        <div class="vitals mini"><span class="fill mana" style="width:53%"></span></div>
+      </div>
+    </div>
+    <div class="party-member warrior">
+      <span class="portrait"><span>⚔</span></span>
+      <div class="member-body">
+        <div class="member-name">Warrior <small>NPC</small></div>
+        <div class="vitals"><span class="fill red" style="width:84%"></span></div>
+        <div class="vitals mini"><span class="fill mana" style="width:68%"></span></div>
+      </div>
+    </div>
+    <div class="party-member mage active">
+      <span class="portrait"><span>✧</span></span>
+      <div class="member-body">
+        <div class="member-name">Mage <small>YOU</small></div>
+        <div class="vitals"><span class="fill red" style="width:100%"></span></div>
+        <div class="vitals mini"><span class="fill mana" style="width:100%"></span></div>
+      </div>
+    </div>
+    <div class="party-member shaman">
+      <span class="portrait"><span>❖</span></span>
+      <div class="member-body">
+        <div class="member-name">Shaman <small>NPC</small></div>
+        <div class="vitals"><span class="fill red" style="width:100%"></span></div>
+        <div class="vitals mini"><span class="fill mana" style="width:44%"></span></div>
+      </div>
+    </div>
   </header>
-  <aside class="hud controls" aria-label="Game controls">
-    <span class="controls-title">CONTROLS</span>
-    <div class="control"><span>Move</span><span class="keys"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span></div>
-    <div class="control"><span>Sprint</span><kbd>SHIFT</kbd></div>
-    <div class="control"><span>Jump</span><kbd>SPACE</kbd></div>
-    <div class="control"><span>Reset position</span><kbd>R</kbd></div>
-    <div class="control"><span>Camera zoom</span><span>SCROLL</span></div>
+
+  <div class="boss-frame hud" aria-label="Decorative training sentinel indicator">
+    <div class="boss-name">Stone Sentinel</div>
+    <div class="boss-track"><span class="boss-fill"></span></div>
+    <div class="boss-caption">TRAINING SCENE · NO COMBAT</div>
+  </div>
+
+  <aside class="scene-label hud" aria-label="Game status">
+    <span class="status-light"></span> <span id="boot-status">LOADING 3D</span>
+    <div>LOW-POLY FANTASY STUDY</div>
   </aside>
-  <div class="hud bottom-left">
-    <span class="tag">FREE ROAM</span>
-    <span id="coords" aria-live="off">X: 0.0 &nbsp; Y: 0.0 &nbsp; Z: 0.0</span>
+
+  <div class="readout hud" aria-live="off">
+    <span id="state-label">IDLE</span>
+    <span class="divider"></span>
+    <span id="coords">X: -5.7 &nbsp; Y: 0.0 &nbsp; Z: -8.0</span>
+    <span class="divider"></span>
     <span id="fps">-- FPS</span>
   </div>
-  <div class="crosshair" aria-hidden="true">+</div>
+
+  <footer class="hotbar hud" aria-label="Movement and demo controls">
+    <div class="hotbar-side">MOVEMENT<br><strong>TEST AREA</strong></div>
+    <div class="slots">
+      <div class="slot gold"><span class="slot-art">↑</span><kbd>W</kbd><span class="hint">FORWARD</span></div>
+      <div class="slot violet"><span class="slot-art">←</span><kbd>A</kbd><span class="hint">LEFT</span></div>
+      <div class="slot cyan"><span class="slot-art">↓</span><kbd>S</kbd><span class="hint">BACK</span></div>
+      <div class="slot violet"><span class="slot-art">→</span><kbd>D</kbd><span class="hint">RIGHT</span></div>
+      <div class="slot gold"><span class="slot-art">✦</span><kbd>SHIFT</kbd><span class="hint">SPRINT</span></div>
+      <div class="slot steel"><span class="slot-art">⇧</span><kbd>SPACE</kbd><span class="hint">JUMP</span></div>
+      <div class="slot ember"><span class="slot-art">↶</span><kbd>R</kbd><span class="hint">RESET</span></div>
+    </div>
+    <div class="hotbar-side right">SCROLL<br><strong>ZOOM</strong></div>
+  </footer>
+
   <div id="error" class="error" role="alert" hidden>
-    <strong>Could not start the 3D scene.</strong><br />
-    <span id="error-detail">Check that WebGL is enabled and the Babylon.js CDN can be reached.</span>
+    <strong>3D scene could not start</strong>
+    <p id="error-detail">Check WebGL and the Babylon.js CDN connection.</p>
   </div>
 </body>
 </html>
