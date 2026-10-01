@@ -49,6 +49,7 @@ function tile(scene, material, coordinates, y) {
 }
 
 export function addHighDetail(scene, ground, soil, randomSource) {
+  const firstDetailMesh = scene.meshes.length;
   const rand=rng(95277);
   const updates=[];
   const basalt=makeMat(scene,"ruin-basalt","#3e332c");
@@ -229,5 +230,13 @@ export function addHighDetail(scene, ground, soil, randomSource) {
     batch.isPickable = false;
   }
   lineGroups.clear();
+  // The stone tiles, pillars, decorations and colored engravings never move.
+  // Precalculate their world matrices once; keep the rising embers dynamic.
+  for (const staticMesh of scene.meshes.slice(firstDetailMesh)) {
+    if (staticMesh.name !== "ember-particle" &&
+        typeof staticMesh.freezeWorldMatrix === "function") {
+      staticMesh.freezeWorldMatrix();
+    }
+  }
   return {update(dt,t){for(const cb of updates)cb(dt,t);}};
 }
