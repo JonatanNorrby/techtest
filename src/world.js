@@ -207,6 +207,60 @@ export function createWorld(scene) {
     animations.push(() => { unit.visual.position.y = Math.sin(elapsed * 2.1 + x) * 0.025; });
   }
 
+  // A translucent orange practice wedge, visually echoing raid encounter telegraphs.
+  // It is a visual demonstration only, not a damaging area or real attack.
+  const warningMat = mat(scene, "practice-warning", "#c8583c", "#6c281d");
+  warningMat.alpha = 0.27;
+  warningMat.backFaceCulling = false;
+  const telegraphPositions = [0, 0.056, 4.1];
+  const telegraphIndices = [];
+  const edgePoints = [];
+  const arcCount = 20;
+  for (let i = 0; i <= arcCount; i++) {
+    const a = (-0.45 + i * (0.90 / arcCount));
+    const px = Math.cos(a) * 7.15;
+    const pz = 4.1 + Math.sin(a) * 7.15;
+    telegraphPositions.push(px, .056, pz);
+    edgePoints.push(new B.Vector3(px, .067, pz));
+    if (i > 0) telegraphIndices.push(0, i + 1, i);
+  }
+  const wedge = new B.Mesh("decorative-training-cone", scene);
+  const wedgeData = new B.VertexData();
+  wedgeData.positions = telegraphPositions;
+  wedgeData.indices = telegraphIndices;
+  wedgeData.normals = [];
+  B.VertexData.ComputeNormals(telegraphPositions, telegraphIndices, wedgeData.normals);
+  wedgeData.applyToMesh(wedge);
+  wedge.material = warningMat;
+  const edgeLine = B.MeshBuilder.CreateLines("practice-cone-edge", { points: edgePoints }, scene);
+  edgeLine.color = B.Color3.FromHexString("#f17b56");
+  edgeLine.alpha = 0.72;
+
+  // Warm gold and electric-blue spell trails demonstrate the art style, not combat.
+  function spellTrail(name, from, to, tint, glowTint, phase) {
+    const color = mat(scene, name + "-magic", tint, glowTint);
+    const orbs = [];
+    for (let i = 0; i < 15; i++) {
+      const t = i / 14;
+      const orb = mesh(scene, name + "-spark", "CreateSphere",
+        { diameter: i === 14 ? .36 : .09 + t * .095, segments: 6 },
+        color, from[0] + (to[0] - from[0]) * t,
+        1.48 + Math.sin(t * Math.PI) * .43,
+        from[1] + (to[1] - from[1]) * t);
+      orbs.push({ orb, t, y: orb.position.y });
+    }
+    animations.push(() => {
+      for (const { orb, t, y } of orbs) {
+        const wobble = Math.sin(elapsed * 5.8 + t * 13 + phase);
+        orb.position.y = y + wobble * .085;
+        const pulse = 0.85 + .2 * Math.sin(elapsed * 8 - t * 18 + phase);
+        orb.scaling.setAll(pulse);
+      }
+    });
+  }
+  spellTrail("priest-healing-light", [-10, 1.6], [-2.35, 4.0], "#ffe79b", "#bc9138", 0);
+  spellTrail("shaman-lightning", [8.7, -7.1], [2.2, 3.0], "#8dd7ff", "#307cbb", 1.8);
+
   // Floor accent under the boss. Purely decorative — no combat system is implied.
   const decal = spot(scene, "ritual-marking", 0, 4.1, 7.15, rune, .031);
   decal.visibility = 0.065;
