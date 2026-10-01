@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#20150f">
   <meta name="description" content="A walkable Babylon.js low-poly fantasy style study.">
   <title>Techtest — Ashen Warden's Lair</title>
-  <link rel="stylesheet" href="./styles.css?v=4">
+  <link rel="stylesheet" href="./styles.css?v=5">
   <script>
     window.techtestReady = false;
     window.techtestError = function (detail) {
@@ -38,7 +38,7 @@
     });
   </script>
   <script defer src="https://cdn.babylonjs.com/babylon.js"></script>
-  <script defer type="module" src="./src/main.js?v=4"></script>
+  <script defer type="module" src="./src/main.js?v=5"></script>
 </head>
 <body>
   <canvas id="renderCanvas" aria-label="Walkable 3D fantasy arena"></canvas>
@@ -63,11 +63,11 @@
         <div class="vitals mini"><span class="fill mana" style="width:68%"></span></div><div class="buffs"><i>⬡</i><i>✥</i><i>✦</i></div>
       </div>
     </div>
-    <div class="party-member mage active">
+    <div class="party-member mage active" aria-label="Playable Mage health">
       <span class="portrait"><span>✧</span></span>
       <div class="member-body">
-        <div class="member-name">Mage <small>YOU</small></div>
-        <div class="vitals"><span class="fill red" style="width:100%"></span></div>
+        <div class="member-name">Mage <small id="mage-hp">100 / 100 HP</small></div>
+        <div class="vitals"><span id="mage-health-fill" class="fill red" style="width:100%"></span></div>
         <div class="vitals mini"><span class="fill mana" style="width:100%"></span></div><div class="buffs"><i>✧</i><i>◈</i><i>✺</i></div>
       </div>
     </div>
@@ -81,12 +81,12 @@
     </div>
   </header>
 
-  <div class="boss-frame hud" aria-label="Decorative boss preview">
+  <div class="boss-frame hud" aria-label="Boss attack and cast progress">
     <div class="boss-emblem">♜</div>
     <div class="boss-main">
-      <div class="boss-top"><span>RAVENGAR, THE ASHEN</span><small>VISUAL TARGET</small></div>
-      <div class="boss-track"><span class="boss-fill"></span><span class="boss-value">DEMO</span></div>
-      <div class="boss-effects"><i>♨</i><i>✦</i><i>⬡</i><span>THE ASHEN WARDEN · NON-COMBAT PREVIEW</span></div>
+      <div class="boss-top"><span>RAVENGAR, THE ASHEN</span><small id="boss-phase">PREPARING</small></div>
+      <div class="boss-track"><span id="boss-cast-fill" class="boss-fill" style="width:0%"></span><span id="boss-value" class="boss-value">WAIT</span></div>
+      <div class="boss-effects"><i>♨</i><i>✦</i><i>⬡</i><span id="boss-mechanic" aria-live="polite">WATCH FOR DANGER ZONES</span></div>
     </div>
   </div>
 
@@ -94,6 +94,17 @@
     <span class="status-light"></span> <span id="boot-status">LOADING 3D</span>
     <div>BABYLON.JS · HIGH DETAIL STUDY</div>
   </aside>
+
+  <div id="hit-notice" class="hit-notice hud" role="status" aria-live="polite"></div>
+  <div id="damage-flash" aria-hidden="true"></div>
+  <div id="defeat-overlay" class="defeat-overlay" hidden>
+    <div class="defeat-card">
+      <span>RAVENGAR, THE ASHEN</span>
+      <h2>YOU WERE DEFEATED</h2>
+      <p>Read the warning zones and move before they detonate. Jump over the seismic shockwave.</p>
+      <strong>PRESS R TO TRY AGAIN</strong>
+    </div>
+  </div>
 
   <div class="readout hud" aria-live="off">
     <span id="state-label">IDLE</span>
@@ -104,7 +115,7 @@
   </div>
 
   <footer class="hotbar hud" aria-label="Movement and demo controls">
-    <div class="hotbar-side"><span class="smallplate">ARENA</span><br><strong>Ashen Warden Lair</strong><small>01 / VISUAL PROTOTYPE</small></div>
+    <div class="hotbar-side"><span class="smallplate">ARENA</span><br><strong>Ashen Warden Lair</strong><small>01 / SURVIVAL ENCOUNTER</small></div>
     <div class="slots">
       <div class="slot gold"><span class="slot-art">↑</span><kbd>W</kbd><span class="hint">FORWARD</span></div>
       <div class="slot violet"><span class="slot-art">←</span><kbd>A</kbd><span class="hint">LEFT</span></div>
@@ -114,7 +125,7 @@
       <div class="slot steel"><span class="slot-art">⇧</span><kbd>SPACE</kbd><span class="hint">JUMP</span></div>
       <div class="slot ember"><span class="slot-art">↶</span><kbd>R</kbd><span class="hint">RESET</span></div>
     </div>
-    <div class="hotbar-side right"><span class="smallplate">VIEW</span><br><strong>SCROLL TO ZOOM</strong><small>WASD · SHIFT · SPACE · R</small></div>
+    <div class="hotbar-side right"><span class="smallplate">VIEW</span><br><strong>DODGE TO SURVIVE</strong><small>WASD · SHIFT · SPACE · R</small></div>
   </footer>
 
   <div id="error" class="error" role="alert" hidden>
