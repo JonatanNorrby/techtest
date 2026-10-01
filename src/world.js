@@ -1,4 +1,5 @@
-import { mat, adventurer, sentinel } from "./actors.js?v=3";
+import { mat, adventurer, sentinel } from "./actors.js?v=4";
+import { addHighDetail } from "./detail.js?v=4";
 
 const B = window.BABYLON;
 function seededRandom(seed) {
@@ -78,6 +79,11 @@ export function createWorld(scene) {
   const ground = new B.Mesh("angular-arena-floor", scene);
   const topData = new B.VertexData();
   topData.positions = positions;
+  // Map the world-space ground polygon into the generated 1024px sandstone texture.
+  topData.uvs = [];
+  for (let n = 0; n < positions.length; n += 3) {
+    topData.uvs.push((positions[n] + 28) / 56, (positions[n + 2] + 19) / 38);
+  }
   topData.indices = indices;
   topData.normals = [];
   B.VertexData.ComputeNormals(positions, indices, topData.normals);
@@ -265,12 +271,15 @@ export function createWorld(scene) {
   const decal = spot(scene, "ritual-marking", 0, 4.1, 7.15, rune, .031);
   decal.visibility = 0.065;
 
+  const detail = addHighDetail(scene, ground, soil, random);
   return {
     colliders,
     inside,
+    lighting: { sun, ground },
     update(dt) {
       elapsed += dt;
       for (const animate of animations) animate(dt);
+      detail.update(dt, elapsed);
     }
   };
 }
