@@ -1,44 +1,47 @@
 # Techtest — Ashen Warden Lair
 
-A browser-based Babylon.js, high-detail **isometric fantasy visual prototype**. This is a free-roam scene (not a combat implementation) inspired by stylized dungeon-raid art direction. All scenery, actor models, the stone texture, and visual spell effects are created procedurally — no external art files or model downloads.
+A lightweight Babylon.js high-detail isometric **boss-dodging prototype**, hosted as a static site on GitHub Pages. The scene and its assets are generated procedurally.
 
-## Visual upgrade (v4)
+## Play
 
-- A 1024px generated sandstone texture, hundreds of individually shaded concentric pavers, inlaid brass arena rings, chips, fissures and patterned ruins.
-- Raised temple pillars, burgundy banners, torch embers and edge foliage.
-- Armored molten stone boss with lava seams, face glow, spikes, floating rubble and idle animation.
-- More detailed chibi fantasy party with shoulder armor, accessories, runic rings and floating nameplates.
-- Layered animated magic beams (healing, lightning, arcane), warning circles and an example cone telegraph.
-- Orthographic follow camera, optional post-processing bloom/FXAA/glow and soft shadows with safe fallback.
-- Dark, ornamented fantasy HUD, decorative party/boss panels and movement-key action bar.
+Visit **https://jonatannorrby.github.io/techtest/** after the GitHub Actions Pages deployment completes.
 
-The party/boss health bars, spell beams and warning markers demonstrate the *visual style only*; there is no implemented combat, damage or ability casting.
+The playable Mage has **100 HP**. Ravengar repeats three real, telegraphed attacks:
 
-## Controls
+| Attack | Warning | Damage | How to avoid |
+| --- | --- | --- | --- |
+| Molten Eruption | Two locked orange circles, 1.9 s | 25 | Move outside both circles before they detonate. |
+| Ashen Cleave | Directional orange cone, 1.75 s | 32 | Move out of the cone before it resolves. |
+| Seismic Shockwave | Large donut warning ring, 2 s | 35 | Reach the inner safe area, move beyond the outer edge, **or jump over it** (be airborne at impact). |
 
-| Input | Action |
+The boss aims at the player's position **when each telegraph first appears**, giving time to react. There is an approximately one-second recovery between abilities. If HP reaches zero, movement stops and a defeat screen appears. Press **R** to restart at full HP and restart the attack sequence. NPC party frames and boss HP remain decorative: there is no player offense or multiplayer yet.
+
+### Controls
+
+| Key | Action |
 | --- | --- |
-| W/A/S/D or arrow keys | Move |
+| W / A / S / D or arrow keys | Walk |
 | Shift | Sprint |
 | Space | Jump |
-| R | Reset |
-| Mouse wheel | Camera zoom |
+| R | Restart / reset position and health |
+| Mouse wheel | Zoom |
 
-A live status, coordinates (X/Y/Z), FPS and startup errors are shown in the UI.
+Your real HP and current cast appear in the fantasy HUD, with hit feedback and a red screen flash when damaged. Actual warning areas appear only while the corresponding attack is charging. Animated NPC spell trails are atmospheric.
 
-## Run and publish
+## Run locally
 
-GitHub Pages URL (when the deployment workflow has succeeded): **https://jonatannorrby.github.io/techtest/**
+Run python -m http.server 8000 in the repo root and open http://localhost:8000. Babylon.js comes from its official CDN; an internet connection is required.
 
-Go to Settings → Pages → Source → GitHub Actions if this is the first deployment. The included `.github/workflows/deploy.yml` deploys each push to `main`. A hard refresh will bypass any older CSS/JS cache.
+## Deploy
 
-Locally: run `python -m http.server 8000` in the repository root and visit http://localhost:8000. The official Babylon.js CDN requires internet. The CDN is convenient for this experiment; bundle/self-host it for production.
+The included .github/workflows/deploy.yml publishes the repository to GitHub Pages on push to main. Under **Settings → Pages**, choose **GitHub Actions** as the source. Check the Actions run to confirm successful deployment. Hard refresh after an update to bypass stale JS/CSS.
 
-## Code layout
+## Structure
 
-- `index.html` / `styles.css` — canvas, errors and HUD
-- `src/main.js` — Babylon startup, high-res post processing and camera/input
-- `src/world.js` — arena, lighting, NPCs, interactive collision boundaries and spell previews
-- `src/detail.js` — detailed stonework, procedural texture, ruins, banners and magical ground effects
-- `src/actors.js` — character and molten boss models
-- `src/player.js` — walking, collision, jump, sprint and reset
+- src/boss.js: encounter state machine, independent attack hit tests and telegraph meshes.
+- src/player.js: movement, HP, damage and death/reset.
+- src/main.js: encounter and player updates, camera, rendering and HUD.
+- src/world.js, src/detail.js, src/actors.js: visual arena, props and characters.
+- index.html, styles.css: HUD, cast bar, damage effects and defeat screen.
+
+The environment has a procedurally drawn 1024-pixel sandstone texture, detailed individual tiles, ruins, banners, lava effects and an armored ash titan. Optional post-processing adds bloom, glow, FXAA and soft shadows, with graceful fallbacks.
