@@ -1,5 +1,5 @@
 import { mat, adventurer, sentinel } from "./actors.js?v=4";
-import { addHighDetail } from "./detail.js?v=4";
+import { addHighDetail } from "./detail.js?v=6";
 
 const B = window.BABYLON;
 function seededRandom(seed) {
