@@ -25,6 +25,8 @@ function startGame() {
   // Aim for crisp rendering on dense displays, capped for reasonable GPU load.
   engine.setHardwareScalingLevel(Math.max(1, (window.devicePixelRatio || 1) / 1.5));
   const scene = new B.Scene(engine);
+  // The demo has no pointer picking; skip unnecessary per-frame hit tests.
+  scene.skipPointerMovePicking = true;
   const world = createWorld(scene);
   const player = new Player(scene, world);
   world.setPlayer(player);
@@ -34,6 +36,7 @@ function startGame() {
   // It follows the Mage, but does not bob up/down during a jump.
   const offset = new B.Vector3(0, 35, -26);
   const focus = new B.Vector3(player.root.position.x, 0, player.root.position.z);
+  const goal = new B.Vector3(focus.x, 0, focus.z);
   const camera = new B.FreeCamera("three-quarter-camera", focus.add(offset), scene);
   camera.setTarget(focus);
   camera.mode = B.Camera.ORTHOGRAPHIC_CAMERA;
@@ -147,10 +150,11 @@ function startGame() {
       noticeTime = Math.max(0, noticeTime - dt);
       if (!noticeTime) hitNotice.classList.remove("visible");
 
-      const goal = new B.Vector3(player.root.position.x, 0, player.root.position.z);
+      goal.set(player.root.position.x, 0, player.root.position.z);
       B.Vector3.LerpToRef(focus, goal, Math.min(1, dt * 4.3), focus);
-      camera.position.copyFrom(focus.add(offset));
-      camera.setTarget(focus);
+      // Orthographic view has a fixed angle: translating the camera with
+      // the player is enough; recalculating rotation each frame is redundant.
+      camera.position.set(focus.x + offset.x, focus.y + offset.y, focus.z + offset.z);
       scene.render();
 
       if (!window.techtestReady) {
