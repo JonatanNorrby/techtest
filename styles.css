@@ -255,3 +255,46 @@ html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
   .slot .hint {display:none;}
   .hotbar-side {display:none;}
 }
+
+
+/* Real damage, cast feedback and defeat state (v5). */
+#mage-hp { color:#ffe0be; font-variant-numeric:tabular-nums; }
+.mage .vitals:first-of-type { box-shadow:0 0 0 1px #af6b486b,inset 0 0 3px #000a; }
+.boss-main { min-width:0; }
+#boss-phase { color:#ffcf85; }
+#boss-mechanic { color:#ffcd91; font-weight:800; line-height:1.4; }
+#boss-cast-fill { display:block; width:0; transition:width .1s linear; background:linear-gradient(#ffcb72,#db6c38 49%,#b4422a); }
+#boss-value { color:#ffebd2; }
+#damage-flash {
+  position:fixed; z-index:5; inset:0; pointer-events:none; opacity:0;
+  background:radial-gradient(ellipse at center,transparent 29%,rgba(229,42,24,.52) 100%);
+}
+.hit-notice {
+  left:50%;top:24%;transform:translateX(-50%) translateY(7px);
+  padding:8px 19px;border:1px solid #e28b54;border-radius:4px;
+  color:#ffe2bb;background:linear-gradient(#643124f0,#24140ff1);
+  box-shadow:0 4px 18px #1c080a99;
+  font-size:21px;letter-spacing:.03em;text-align:center;font-weight:900;
+  text-shadow:0 2px #2a1008;opacity:0;
+  transition:opacity .12s ease,transform .12s ease;
+}
+.hit-notice.visible {opacity:1;transform:translateX(-50%) translateY(0);}
+.defeat-overlay {
+ position:fixed;inset:0;z-index:12;display:grid;place-items:center;
+ background:radial-gradient(ellipse at center,rgba(23,11,10,.76),rgba(15,7,6,.91));
+ pointer-events:none;text-align:center;
+}
+.defeat-card {
+ width:min(530px,90vw);padding:40px 31px 42px;border:1px solid #bd8050;
+ background:linear-gradient(#392117f8,#1b110ef9);
+ box-shadow:inset 0 0 0 3px #1c110b,inset 0 0 0 4px #8e633b77,0 16px 50px #0009;
+}
+.defeat-card span {color:#cb885b;letter-spacing:.22em;font-size:11px;}
+.defeat-card h2 {margin:13px 0;font:900 clamp(27px,4vw,44px) Georgia,serif;color:#e9ae7c;text-shadow:0 3px #1b0b06;letter-spacing:.04em;}
+.defeat-card p {font-size:14px;line-height:1.7;color:#d6baa4;margin:13px auto 27px;max-width:380px;}
+.defeat-card strong {display:inline-block;padding:12px 20px;color:#fff0d2;border:1px solid #c28a54;background:linear-gradient(#70412b,#3f2518);font-size:12px;letter-spacing:.11em;}
+@media(max-width:690px){
+ #boss-mechanic {font-size:8px;}
+ .hit-notice {top:19%;font-size:14px;padding:7px 10px;}
+ .defeat-card {padding:25px 20px;}
+}
