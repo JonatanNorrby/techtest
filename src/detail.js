@@ -22,10 +22,12 @@ function rock(scene, material, x,y,z, sx,sy,sz, yaw=0) {
   m.position.set(x,y,z); m.scaling.set(sx,sy,sz); m.rotation.y=yaw; m.material=material;
   return m;
 }
-function line(scene,name,points,color) {
-  const m = B.MeshBuilder.CreateLines(name,{points},scene);
-  m.color = B.Color3.FromHexString(color); m.isPickable=false;
-  return m;
+// Preserve the exact colored line vertices, but submit one line-system mesh
+// per color instead of hundreds of independent draw calls.
+const lineGroups = new Map();
+function line(scene, name, points, color) {
+  if (!lineGroups.has(color)) lineGroups.set(color, []);
+  lineGroups.get(color).push(points);
 }
 function circle(scene,name,x,z,r,y,color,segments=80,start=0,end=2*Math.PI) {
   const pts=[];
@@ -89,6 +91,7 @@ export function addHighDetail(scene, ground, soil, randomSource) {
   soil.diffuseColor=B.Color3.FromHexString("#fff1de");
   // Ground mesh in world.js provides matching UVs for this generated texture.
   const tileMaterials=[stoneDark,stoneMid,stoneLight,carved];
+  const paverGroups = new Map(tileMaterials.map(material => [material, []]));
 
   // Fine individual 3D stone slabs arranged in annular bands. Each has unique skew and tone.
   const bands=[
@@ -107,11 +110,24 @@ export function addHighDetail(scene, ground, soil, randomSource) {
         proj(a1,outer-.05+outerVariation),proj(a0,outer-.05+outerVariation)
       ];
       const material=tileMaterials[Math.floor(rand()*tileMaterials.length)];
-      tile(scene,material,quad,.041+b*.0005);
+      paverGroups.get(material).push(tile(scene,material,quad,.041+b*.0005));
     }
     circle(scene,"engraved-masonry-ring",centerX,centerZ,outer*1.01,.048,"#a18465",112);
     circle(scene,"deep-carving",centerX,centerZ,inner*.98,.048,"#4d3729",112);
   }
+  // Merging preserves each stone's original geometry and material while
+  // reducing the 438 independently rendered pavers to four material batches.
+  for (const [material, slabs] of paverGroups) {
+    if (slabs.length < 2 || typeof B.Mesh.MergeMeshes !== "function") continue;
+    const batch = B.Mesh.MergeMeshes(slabs, true, true, undefined, false, false);
+    if (batch) {
+      batch.name = "carved-sandstone-paver-batch";
+      batch.material = material;
+      batch.receiveShadows = true;
+      batch.isPickable = false;
+    }
+  }
+
   // More distinct brass-inlaid concentric runic line work.
   for (const r of [2.7,3.08,7.95,13.53]){
     circle(scene,"brass-arena-inlay",0,0,r,.065,"#b28b52",144);
@@ -204,5 +220,14 @@ export function addHighDetail(scene, ground, soil, randomSource) {
       p.mesh.position.z=p.z+Math.sin(p.angle+t*1.1)*p.dist;
     }
   });
+  // Batch the engraved rings, cracks, radial markings and runes by color,
+  // with identical point positions and colors to the original separate lines.
+  for (const [color, paths] of lineGroups) {
+    const batch = B.MeshBuilder.CreateLineSystem("batched-stone-engraving",
+      { lines: paths }, scene);
+    batch.color = B.Color3.FromHexString(color);
+    batch.isPickable = false;
+  }
+  lineGroups.clear();
   return {update(dt,t){for(const cb of updates)cb(dt,t);}};
 }
