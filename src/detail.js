@@ -184,29 +184,7 @@ export function addHighDetail(scene, ground, soil, randomSource) {
     [-11.5,16.2,1.1],[6.8,16.0,.9],[-20,-13,1.0],[18.2,-14,.95]
   ].forEach(s=>shrub(...s));
 
-  // Molten crack telegraphs: two radial danger markers on the stonework (visual only).
-  function warningCircle(x,z,r,phase) {
-    const burn=makeMat(scene,"scorched-floor","#e26030","#aa3917",.38);
-    burn.backFaceCulling=false;
-    const disc=B.MeshBuilder.CreateDisc("molten-ground-warning",{radius:r,tessellation:60,sideOrientation:B.Mesh.DOUBLESIDE},scene);
-    disc.rotation.x=-Math.PI/2;disc.position.set(x,.092,z);disc.material=burn;
-    const rings=[circle(scene,"warning-orange-outline",x,z,r,.099,"#ff7237",72)];
-    circle(scene,"warning-interior",x,z,r*.92,.10,"#9e3f2a",72);
-    for(let i=0;i<13;i++){
-      const a=rand()*6.283,rr=rand()*r*.8;
-      const cx=x+Math.cos(a)*rr,cz=z+Math.sin(a)*rr;
-      const pts=[v(cx,.105,cz)];
-      for(let j=0;j<3;j++)pts.push(v(cx+(rand()-.5)*r*.35,.105,cz+(rand()-.5)*r*.34));
-      line(scene,"fire-fissure",pts,"#ff9c54");
-    }
-    updates.push((dt,t)=>{
-      burn.alpha=.23+.07*Math.sin(t*2.2+phase);
-      rings[0].visibility=.65+.30*Math.sin(t*2.2+phase);
-    });
-  }
-  warningCircle(-12.7,7.7,2.1,.2);
-  warningCircle(15.5,6.1,2.0,1.3);
-  warningCircle(1.1,-12.0,1.7,2.6);
+  // Damage indicators are now owned by BossEncounter, and only appear during a cast.
 
   // A few floating embers around braziers, all low-overhead animated meshes.
   const sparks=[];
