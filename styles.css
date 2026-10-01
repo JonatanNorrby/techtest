@@ -298,3 +298,64 @@ html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
  .hit-notice {top:19%;font-size:14px;padding:7px 10px;}
  .defeat-card {padding:25px 20px;}
 }
+
+
+/* v7: genuinely playable Mage abilities and live boss health. */
+.boss-health-track {
+  position:relative; height:18px; margin:0 0 5px;
+  border:1px solid #533725; padding:2px; background:#130c0a;
+  box-shadow:inset 0 1px 4px #000a;
+}
+.boss-health-track > span {
+  display:block; height:100%; background:linear-gradient(#ee9174,#c15547 44%,#8f332c);
+  border-top:1px solid #ffd1ac75; box-shadow:0 0 6px #ec70454d;
+  transition:width .13s linear;
+}
+.boss-health-track > strong {
+  position:absolute; right:6px; top:2px; color:#fff2dc;
+  font-size:10px; text-shadow:0 1px 2px #180909; font-variant-numeric:tabular-nums;
+}
+.boss-track {height:18px;}
+.boss-main {padding-bottom:6px;}
+.fill.shield {background:linear-gradient(#a6eaff,#4694ca 55%,#245c9a);box-shadow:0 0 6px #6dd8ff7a;}
+#mage-shield-value {margin-left:auto;font-size:8px;color:#96dafe;letter-spacing:.025em;}
+.ability-slot {
+  appearance:none; font:inherit; padding:0; margin:0;
+  pointer-events:auto; cursor:pointer; -webkit-tap-highlight-color:transparent;
+}
+.ability-slot:hover:not(:disabled) {transform:translateY(-2px);filter:brightness(1.17);}
+.ability-slot:focus-visible {outline:2px solid #ffe6ac;outline-offset:5px;}
+.ability-slot:disabled {cursor:default;filter:saturate(.58) brightness(.77);}
+.ability-slot .slot-art {position:relative;z-index:1;}
+.cd-overlay {
+  display:grid;place-items:center;position:absolute;inset:3px;z-index:2;
+  border-radius:3px;pointer-events:none;background:#100a10b9;color:#f7e4cc;
+  text-shadow:0 2px 4px #000;font-size:18px;font-weight:900;font-variant-numeric:tabular-nums;
+}
+.cd-overlay[hidden] {display:none;}
+.hotbar .slots {gap:19px;}
+.hotbar .ability-slot .hint {bottom:-37px;min-width:82px;font-weight:900;}
+.hotbar .ability-slot kbd {bottom:-21px;}
+.cast-notice {
+  top:35%;left:50%;transform:translate(-50%,7px);
+  background:#20132bdc; border:1px solid #9162ca; color:#edddff;
+  border-radius:4px;padding:7px 15px;opacity:0;transition:opacity .15s ease,transform .15s ease;
+  text-shadow:0 1px #0b0610;font-size:13px;font-weight:900;letter-spacing:.035em;
+  text-align:center;max-width:min(340px,80vw);
+}
+.cast-notice.visible {opacity:1;transform:translate(-50%,0);}
+.victory-overlay {background:radial-gradient(ellipse at center,#0e2617df,#090b09f2);}
+.victory-overlay .defeat-card {border-color:#bca06d; background:linear-gradient(#30291bf8,#131b14f9);}
+.victory-overlay .defeat-card h2 {color:#dce6a4;}
+@media(max-width:950px) {
+ .hotbar .slots {gap:12px;}
+}
+@media(max-width:690px) {
+ .hotbar .slots {gap:15px;}
+ .hotbar .ability-slot {width:min(18vw,62px);height:53px;}
+ .hotbar .ability-slot .hint {display:block;bottom:-32px;min-width:0;font-size:7px;}
+ .boss-health-track {height:12px;}
+ .boss-health-track > strong {font-size:7px;top:0;}
+ .boss-track {height:12px;}
+ .cast-notice {top:28%;font-size:11px;}
+}
