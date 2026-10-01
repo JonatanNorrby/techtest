@@ -1,47 +1,52 @@
-# The Little Outpost — Babylon.js 3D demo
+# Techtest — The Ember Arena
 
-A tiny browser-based 3D walking playground. No build tools, backend, npm dependencies, downloaded models or game engine setup needed. Babylon.js is loaded from its official CDN; every object in the demo is created in JavaScript from primitive meshes.
+A browser-based Babylon.js 3D movement demo restyled as a **warm, low-poly fantasy arena**, inspired by a top-down dungeon encounter reference. It is a graphical style study, **not a combat game**.
 
-## Play
+## What's in the demo
 
-Once GitHub Pages is enabled, visit **https://jonatannorrby.github.io/techtest/**.
+- High three-quarter **orthographic** following camera, with wheel zoom.
+- An irregular, faceted brown arena with chunky stones, pillars, torches and ambient lighting.
+- A walkable purple Mage with a low-poly hood, robe, staff, colored selection ring and floating nameplate.
+- Decorative NPC party members (Priest, Warrior and Shaman) and a large non-hostile stone sentinel.
+- Dark fantasy UI: party roster, decorative sentinel bar, ornate movement hotbar and live coordinates/FPS.
+- Procedurally created meshes and materials: no third-party model or texture files.
+
+## Controls
 
 | Input | Action |
 | --- | --- |
-| W A S D or arrow keys | Walk |
-| Hold Shift | Sprint |
+| W / A / S / D or arrow keys | Move |
+| Shift | Sprint |
 | Space | Jump |
 | R | Reset to spawn |
 | Mouse wheel | Camera zoom |
 
-The camera follows the character at a fixed angle. Scenery has simple circular collision, and movement slides along objects. The random test environment uses a fixed seed, so it is reproducible.
+All party/health bars and the sentinel are **decorative**, and the hotbar labels represent movement controls only. Combat, character switching and multiplayer are not implemented.
+
+## Play online
+
+Once GitHub Pages is configured under **Settings → Pages → Build and deployment → GitHub Actions**, the included workflow publishes the static game on pushes to main:
+
+**https://jonatannorrby.github.io/techtest/**
+
+If it looks cached after a new deployment, use a hard refresh. Startup or render errors are surfaced in the page rather than leaving an apparently static screen.
 
 ## Run locally
 
-Serve this folder using any static HTTP server (ES modules usually cannot be loaded directly from a file:// URL):
+Serve via HTTP so JavaScript modules work:
 
     python -m http.server 8000
 
-Open **http://localhost:8000**. An internet connection is required for the Babylon.js CDN.
+Open http://localhost:8000. Babylon.js is loaded from the official CDN; internet access is needed.
 
-## Deploy to GitHub Pages
+## Files
 
-This repository contains an automated Pages workflow at .github/workflows/deploy.yml.
+    index.html                  Game canvas, visible errors and fantasy HUD
+    styles.css                  Dark fantasy HUD and ability-like control tiles
+    src/actors.js               Shared low-poly character and sentinel meshes
+    src/world.js                Arena mesh, props, lighting and decorative NPCs
+    src/player.js               Playable Mage, movement, jumping and collisions
+    src/main.js                 Babylon startup, input and camera follow
+    .github/workflows/deploy.yml   Automatic GitHub Pages publishing
 
-1. Open the repository's **Settings → Pages**.
-2. Under **Build and deployment**, set **Source** to **GitHub Actions**.
-3. Push to main or run the **Deploy playground** workflow under the **Actions** tab.
-4. Open **https://jonatannorrby.github.io/techtest/** once the workflow succeeds.
-
-## Structure
-
-    index.html                    Canvas and HUD
-    styles.css                    Responsive HUD and visual polish
-    src/main.js                   Babylon engine, input and follow camera
-    src/player.js                 Mesh-based character, movement, jump and collision
-    src/world.js                  Terrain, procedural scenery, lights and portal
-    .github/workflows/deploy.yml  Publish static files to GitHub Pages
-
-Edit src/world.js to add meshes or change the fixed random seed. Edit src/player.js for movement or character appearance. The portal is a decorative test model rather than a working teleport system.
-
-**Note:** The official Babylon.js CDN is intended for learning and small experiments like this demo. For a production game, bundle or self-host Babylon.js.
+To change the visual style, start with the color/material definitions in src/world.js and src/actors.js. The scene is built from Babylon primitives to keep this test easy to modify. For production projects, consider bundling or self-hosting Babylon.js instead of the public experiment CDN.
