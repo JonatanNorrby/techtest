@@ -289,6 +289,14 @@ export function createWorld(scene) {
   decal.visibility = 0.065;
 
   const detail = addHighDetail(scene, ground, soil, random);
+  // The environment keeps the same meshes and lighting, but these parts
+  // never animate: stop recalculating their transform matrices each frame.
+  const sceneryNames = /^(angular-arena-floor|faceted-arena-sides|dark-surround|earth-patch|loose-stone|boulder-contact-shadow|faceted-scatter-rock|pillar-shadow|broken-sandstone-pillar|worn-pillar-cap|stone-brazier|brazier-ledge|large-rock-shadow|arena-boulder|ritual-marking)$/;
+  for (const still of scene.meshes) {
+    if (sceneryNames.test(still.name) && typeof still.freezeWorldMatrix === "function") {
+      still.freezeWorldMatrix();
+    }
+  }
   return {
     colliders,
     inside,
