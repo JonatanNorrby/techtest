@@ -108,6 +108,9 @@ export class BossEncounter {
   constructor(scene, player) {
     this.scene = scene;
     this.player = player;
+    this.maxHp = 260;
+    this.hp = this.maxHp;
+    this.defeated = false;
     this.delay = 1.25;
     this.index = 0;
     this.state = "idle";
@@ -128,6 +131,8 @@ export class BossEncounter {
   }
 
   reset() {
+    this.hp = this.maxHp;
+    this.defeated = false;
     this.clearGraphics();
     this.index = 0;
     this.delay = 1.25;
@@ -137,6 +142,22 @@ export class BossEncounter {
     this.lastHit = null;
     this.statusText = "Boss preparing...";
     this.progress = 0;
+  }
+
+  takeDamage(amount) {
+    if (this.defeated || this.player.dead || !Number.isFinite(amount) || amount <= 0) return 0;
+    const dealt = Math.min(this.hp, amount);
+    this.hp = Math.max(0, this.hp - amount);
+    if (this.hp === 0) {
+      this.defeated = true;
+      this.clearGraphics();
+      this.active = null;
+      this.state = "victory";
+      this.progress = 0;
+      this.time = 0;
+      this.statusText = "RAVENGAR DEFEATED — PRESS R TO RESTART";
+    }
+    return dealt;
   }
 
   track(mesh, material) {
@@ -217,6 +238,7 @@ export class BossEncounter {
   }
 
   update(dt) {
+    if (this.defeated) return;
     if (this.player.dead) {
       this.clearGraphics();
       this.active = null;
