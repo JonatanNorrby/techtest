@@ -1,4 +1,4 @@
-import { adventurer, mat } from "./actors.js?v=3";
+import { adventurer, mat } from "./actors.js?v=4";
 
 const B = window.BABYLON;
 const SPAWN = { x: -5.7, y: 0, z: -8 };
